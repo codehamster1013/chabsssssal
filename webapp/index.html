@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!--
+ ============================================================
+  손가락 길잡이 — 웹 타자연습 앱 (데이터 대시보드형 / 파일 분리판)
+  한국코드페어 2026 · SW공모전 초등부
+ ------------------------------------------------------------
+  실행: 크롬/엣지로 이 index.html 을 더블클릭(file://)
+        - 연습 / 손그림 / 화면 키보드 / 데모 / 기록 그래프: 인터넷 없이 동작
+        - 아두이노 손가락 감지 연동만 USB + [아두이노 연결] 필요
+  스택: HTML + CSS + 클래식 JS(Web Serial). 외부 CDN/폰트/라이브러리 없음.
+  스크립트 로드 순서(의존성): config → hands/keyboard/serial/history → app
+ ============================================================
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>손가락 길잡이 — 타자연습</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 + 탭 -->
+  <header class="app-head">
+    <div>
+      <h1><span class="key">⌨️</span> 손가락 길잡이 — 타자 연습</h1>
+      <p class="catch">손가락이 제자리를 찾도록, 키보드가 알려주고 화면이 기록한다.</p>
+      <p class="sub">어느 <b>손가락</b>으로 쳤는지까지 보고 <b>올바른 운지</b>를 길러주는 타자 연습기</p>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="practice">연습</button>
+      <button class="tab" data-tab="history">기록</button>
+    </nav>
+  </header>
+
+  <!-- ===================== 연습 화면 ===================== -->
+  <section id="view-practice">
+
+    <!-- 컨트롤 바 -->
+    <div class="toolbar">
+      <button id="connectBtn" class="primary">아두이노 연결</button>
+      <button id="restartBtn">다시 시작</button>
+      <label class="toggle"><input type="checkbox" id="demoChk"> 데모 모드(아두이노 없이 손가락 시뮬레이션)</label>
+      <span id="status">상태: 준비 중…</span>
+    </div>
+
+    <div class="dash">
+      <!-- 왼쪽: 주작업 영역 -->
+      <div>
+        <!-- 문장 카드 -->
+        <div class="card card-pad" style="margin-bottom:16px;">
+          <p class="card-title">연습 문장 — 노란색이 지금 칠 글자</p>
+          <div id="sentence"></div>
+
+          <!-- 다정한 말풍선 안내 (따뜻형 톤) -->
+          <div class="bubble" id="bubble">준비됐어요! 위 문장을 따라 쳐 볼까요?</div>
+
+          <div class="hint">
+            이번 글자 <span class="chip" id="curChar">-</span>
+            <span class="sep">·</span>
+            쳐야 할 손가락 <span class="chip" id="needFinger">-</span>
+            <span class="sep">·</span>
+            실제 친 손가락 <b id="gotFinger">-</b>
+            <span class="judge" id="judge"></span>
+          </div>
+          <input id="typing" placeholder="여기에 따라 쳐보세요" autocomplete="off"
+                 autocapitalize="off" spellcheck="false">
+        </div>
+
+        <!-- 양손 그림 + 화면 키보드 (색이 손가락-키 관계를 알려줌) -->
+        <div class="card card-pad">
+          <p class="card-title">내 손 — 빛나는 손가락으로 쳐요 ✨</p>
+          <div class="hands-stage" id="hands"><!-- hands.js 가 양손 SVG 삽입 --></div>
+          <div class="kbd-wrap" id="keyboard"><!-- keyboard.js 가 키 삽입 --></div>
+          <div class="legend">
+            <span><i style="background:var(--c-target)"></i>쳐야 할 손가락/키 (파랑)</span>
+            <span><i style="background:var(--c-correct)"></i>올바르게 침 (초록)</span>
+            <span><i style="background:var(--c-wrong)"></i>틀림·독수리 (빨강)</span>
+            <span><i style="background:linear-gradient(90deg,#7e57c2,#66bb6a,#ec6a8a)"></i>은은한 색 = 그 키 담당 손가락</span>
+          </div>
+        </div>
+
+        <!-- 결과 패널 -->
+        <div id="result">
+          <div class="best-badge result-badge" id="rBest" style="display:none;">🏆 새 최고 운지율 기록!</div>
+          <h2>연습 끝! 결과 요약</h2>
+          <div class="rrow"><span class="rl">정확도</span>
+            <div class="rbar"><span id="rAcc"></span></div><b id="rAccTxt"></b></div>
+          <div class="rrow"><span class="rl">올바른 운지율</span>
+            <div class="rbar"><span id="rFin"></span></div><b id="rFinTxt"></b></div>
+          <div class="rrow"><span class="rl">타수(분당)</span>
+            <div class="rbar"><span id="rSpd" style="background:var(--accent)"></span></div><b id="rSpdTxt"></b></div>
+          <p class="result-note">손가락별 운지 정확도 (자주 틀린 손가락 = 약점)</p>
+          <div id="rFingers"></div>
+        </div>
+      </div>
+
+      <!-- 오른쪽: 실시간 수치 (운지율이 주인공) -->
+      <aside class="metrics">
+        <div class="metric hero gauge-none" id="heroCard">
+          <div class="m-lab">올바른 운지율</div>
+          <div class="m-num" id="finger">-</div>
+          <div class="m-sub">제 손가락으로 친 비율 — 우리 앱만의 지표</div>
+        </div>
+        <div class="metric">
+          <div class="m-lab">정확도</div>
+          <div class="m-num" id="acc">100%</div>
+          <div class="m-sub">글자를 맞게 친 비율</div>
+        </div>
+        <div class="metric accent">
+          <div class="m-lab">타수 (분당)</div>
+          <div class="m-num" id="speed">0</div>
+          <div class="m-sub">1분에 친 글자 수</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== 기록 화면 ===================== -->
+  <section id="view-history" style="display:none;">
+    <div class="hist-head">
+      <h2>연습 기록 &amp; 향상 추이</h2>
+      <button id="clearHistBtn" class="ghost-danger">기록 초기화</button>
+    </div>
+    <div id="history"><!-- history.js 가 요약+그래프 삽입 --></div>
+  </section>
+
+</div>
+
+<!-- 운지 콤보 보상 토스트가 뜨는 자리 (작게, 화면 하단 중앙) -->
+<div id="toast-wrap" class="toast-wrap" aria-live="polite"></div>
+
+<!-- 스크립트: 의존성 순서대로(모듈 아님, file:// CORS 회피). body 끝 = DOM 이후 -->
+<script src="js/config.js"></script>
+<script src="js/hands.js"></script>
+<script src="js/keyboard.js"></script>
+<script src="js/serial.js"></script>
+<script src="js/history.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
