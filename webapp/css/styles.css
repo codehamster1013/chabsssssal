@@ -209,57 +209,49 @@ label.toggle input { width: 15px; height: 15px; accent-color: var(--accent); }
 }
 .hands-stage svg { width: 100%; height: auto; display: block; overflow: visible; }
 
-/* 손바닥 — 은은한 회청 글래스 */
-.palm {
-  fill: rgba(173, 186, 209, .30); stroke: rgba(120,140,180,.32); stroke-width: 1.5;
-}
-.hand-tag {
-  font-size: 13px; font-weight: 800; fill: rgba(90,104,130,.55);
-  font-family: "Apple SD Gothic Neo","맑은 고딕",sans-serif;
-}
-
-/* 손가락 — 평소엔 그 손가락 고유색의 파스텔, 상태색이 덮어씀 */
+/* 손가락 색 띠 — 실사 손 이미지 위에 겹치는 '끝→밑동' 둥근 stroke.
+   두께(stroke-width)는 손가락별로 SVG 속성으로 지정(여기선 색·투명도·발광만). */
 .finger {
-  fill: var(--fc, #9aa6b6); fill-opacity: .30;
-  stroke: var(--fc, #7c8a9c); stroke-opacity: .55; stroke-width: 2;
-  transition: fill-opacity .12s ease, stroke-width .12s ease, filter .12s ease;
+  fill: none;
+  stroke: var(--fc, #9aa6b6); stroke-opacity: .22; stroke-linecap: round;
+  mix-blend-mode: multiply;   /* 살색 위에 자연스레 물든 느낌 */
+  transition: stroke-opacity .12s ease, stroke .12s ease, filter .12s ease;
 }
 .finger.target {
-  fill: var(--c-target); fill-opacity: 1; stroke: #fff; stroke-width: 2.5;
-  filter: drop-shadow(0 0 10px rgba(37,99,235,.85));
-  transform-box: fill-box; transform-origin: center;
+  stroke: var(--c-target); stroke-opacity: .58;
+  filter: drop-shadow(0 0 16px rgba(37,99,235,.95));
   animation: fingerpulse 1.05s ease-in-out infinite;
 }
 .finger.correct {
-  fill: var(--c-correct); fill-opacity: 1; stroke: #fff; stroke-width: 2.5;
-  filter: drop-shadow(0 0 10px rgba(22,163,74,.85));
+  stroke: var(--c-correct); stroke-opacity: .62;
+  filter: drop-shadow(0 0 16px rgba(22,163,74,.95));
 }
 .finger.wrong {
-  fill: var(--c-wrong); fill-opacity: 1; stroke: #fff; stroke-width: 2.5;
-  filter: drop-shadow(0 0 10px rgba(225,29,72,.85));
+  stroke: var(--c-wrong); stroke-opacity: .62;
+  filter: drop-shadow(0 0 16px rgba(225,29,72,.95));
 }
-.finger.weak { fill: var(--bad); fill-opacity: .42; stroke: var(--bad); stroke-width: 3; }
+.finger.weak { stroke: var(--bad); stroke-opacity: .5; }
 @keyframes fingerpulse {
-  0%,100% { transform: translateY(0) scale(1); }
-  50%     { transform: translateY(-5px) scale(1.04); }
+  0%,100% { stroke-opacity: .5;  filter: drop-shadow(0 0 12px rgba(37,99,235,.7)); }
+  50%     { stroke-opacity: .8;  filter: drop-shadow(0 0 26px rgba(37,99,235,1)); }
 }
 
-/* 손끝 홈키 글자 */
+/* 손끝 홈키 글자 (viewBox 1408 기준이라 크게) */
 .flabel {
-  font-size: 15px; font-weight: 800; fill: #fff;
-  paint-order: stroke; stroke: rgba(60,72,100,.35); stroke-width: 3px;
+  font-size: 44px; font-weight: 900; fill: #4a3a2e;
+  paint-order: stroke; stroke: rgba(255,255,255,.92); stroke-width: 7px;
   font-family: "Apple SD Gothic Neo","맑은 고딕",sans-serif; pointer-events: none;
 }
 /* ▼지금 마커 */
 .now-mark {
-  font-size: 16px; font-weight: 900; fill: var(--accent);
-  paint-order: stroke; stroke: #fff; stroke-width: 4px;
+  font-size: 52px; font-weight: 900; fill: var(--accent);
+  paint-order: stroke; stroke: #fff; stroke-width: 9px;
   font-family: "Apple SD Gothic Neo","맑은 고딕",sans-serif;
   animation: nowbob 1.05s ease-in-out infinite;
 }
-@keyframes nowbob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes nowbob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 /* 칭찬 ⭐ / 경고 팝 */
-.finger-pop { font-size: 24px; pointer-events: none; animation: pop .65s ease-out forwards; }
+.finger-pop { font-size: 70px; pointer-events: none; animation: pop .65s ease-out forwards; }
 @keyframes pop {
   0% { opacity: 0; transform: translateY(0) scale(.5); }
   30% { opacity: 1; transform: translateY(-10px) scale(1.25); }
