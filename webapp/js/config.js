@@ -121,8 +121,8 @@
     rateClass: rateClass,
     // 손가락 매칭 허용 시간(ms) — 기존 동작 그대로 0.6초
     MATCH_WINDOW_MS: 600,
-    // 데모 시 다른 손가락(독수리) 비율 — 기존 20%
-    DEMO_WRONG_RATE: 0.2,
+    // 데모 시 다른 손가락(독수리) 비율 — 10% (정답 약 90%)
+    DEMO_WRONG_RATE: 0.1,
     // localStorage 키
     HISTORY_KEY: "fg_history",
     // 운지율 목표선(%)

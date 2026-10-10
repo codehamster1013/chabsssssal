@@ -738,8 +738,8 @@ label.toggle input { width: 15px; height: 15px; accent-color: var(--accent); }
     rateClass: rateClass,
     // 손가락 매칭 허용 시간(ms) — 기존 동작 그대로 0.6초
     MATCH_WINDOW_MS: 600,
-    // 데모 시 다른 손가락(독수리) 비율 — 기존 20%
-    DEMO_WRONG_RATE: 0.2,
+    // 데모 시 다른 손가락(독수리) 비율 — 10% (정답 약 90%)
+    DEMO_WRONG_RATE: 0.1,
     // localStorage 키
     HISTORY_KEY: "fg_history",
     // 운지율 목표선(%)
@@ -1519,7 +1519,7 @@ label.toggle input { width: 15px; height: 15px; accent-color: var(--accent); }
    기존 webapp/index.html 의 판정 로직을 그대로 이식:
      - keydown: 일반 글자 1글자만, 정확도=(전체-오타)/전체, 맞으면 다음 글자
      - 운지: need 와 lastFinger 가 0.6초 이내면 매칭 → 'G'/'R' 송신
-     - 데모: 80% 정답 / 20% 다른 손가락
+     - 데모: 90% 정답 / 10% 다른 손가락
      - 다시 시작: 카운터 초기화 + 문장 순환
    추가: 화면 키보드 강조/플래시, 종료 시 세션 기록 저장
    ============================================================ */
@@ -1595,7 +1595,7 @@ label.toggle input { width: 15px; height: 15px; accent-color: var(--accent); }
     FG.keyboard.target(SENTENCE[pos] != null ? SENTENCE[pos] : null);
   }
 
-  // ---------- 데모: 80% 정답, 20% 다른 손가락 ----------
+  // ---------- 데모: 90% 정답, 10% 다른 손가락 ----------
   function simulateFinger(need) {
     var f = need;
     if (Math.random() < cfg.DEMO_WRONG_RATE) {
